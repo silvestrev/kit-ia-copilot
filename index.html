@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia do Kit IA para Copilot</title>
+<meta name="description" content="Como instalar e usar o kit de agentes, prompts e regras para o GitHub Copilot no VS Code.">
+<style>
+:root{
+  --bg:#ffffff; --fg:#111111; --muted:#5f5f5f; --line:#d9d9d9;
+  --box:#f5f5f5; --accent:#0b57d0; --code:#f1f1f1;
+  --gap:16px; --gap-l:24px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#111111; --fg:#ededed; --muted:#a0a0a0; --line:#2e2e2e; --box:#1a1a1a; --accent:#8ab4f8; --code:#1d1d1d}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--accent)}
+code{font:0.9em ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);padding:1px 5px}
+pre{margin:0;padding:var(--gap);background:var(--code);overflow-x:auto;font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
+pre code{background:none;padding:0;font:inherit}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1120px;margin:0 auto}
+nav{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--gap-l) var(--gap);border-right:1px solid var(--line)}
+nav strong{display:block;margin-bottom:var(--gap);font-size:15px}
+nav a{display:block;padding:4px 0;color:var(--muted);text-decoration:none;font-size:14px}
+nav a:hover{color:var(--fg)}
+main{padding:var(--gap-l) var(--gap-l) 80px;min-width:0}
+h1{font-size:28px;line-height:1.25;margin:0 0 8px}
+h2{font-size:22px;margin:56px 0 var(--gap);padding-top:var(--gap);border-top:1px solid var(--line)}
+h3{font-size:16px;margin:var(--gap-l) 0 8px}
+p{margin:0 0 var(--gap)}
+ul,ol{margin:0 0 var(--gap);padding-left:22px}
+li{margin:4px 0}
+.lead{color:var(--muted);margin-bottom:var(--gap-l)}
+.note{border:1px solid var(--line);background:var(--box);padding:var(--gap);margin:0 0 var(--gap)}
+.note p:last-child{margin:0}
+.tablewrap{overflow-x:auto;margin:0 0 var(--gap)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--box)}
+.code{position:relative;margin:0 0 var(--gap);border:1px solid var(--line)}
+.code button{position:absolute;top:8px;right:8px}
+.code pre{padding-right:84px}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:4px 10px;cursor:pointer;border-radius:0}
+button:hover{background:var(--box)}
+.skip{position:absolute;left:-999px}
+.skip:focus{left:var(--gap);top:var(--gap);background:var(--bg);padding:8px}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  nav a{display:inline-block;margin-right:var(--gap)}
+  main{padding:var(--gap-l) var(--gap) 64px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<div class="layout">
+<nav aria-label="Seções">
+  <strong>Kit IA para Copilot</strong>
+  <a href="#o-que-e">O que é</a>
+  <a href="#instalar">Instalar</a>
+  <a href="#primeiro-uso">Primeiro uso</a>
+  <a href="#fluxo">Fluxo de uma tarefa</a>
+  <a href="#na-pratica">Na prática</a>
+  <a href="#receitas">Receitas</a>
+  <a href="#comandos">Comandos</a>
+  <a href="#agentes">Agentes</a>
+  <a href="#regras">Regras automáticas</a>
+  <a href="#auditoria">Auditoria e performance</a>
+  <a href="#contexto">Contexto e limite de uso</a>
+  <a href="#responsividade">Responsividade</a>
+  <a href="#roteiro">Roteiro de teste</a>
+  <a href="#problemas">Problemas comuns</a>
+</nav>
+<main id="conteudo">
+<h1>Guia do Kit IA para Copilot</h1>
+<p class="lead">Kit de pastas prontas para o GitHub Copilot no VS Code trabalhar em passos pequenos, seguindo o padrão do seu projeto.</p>
+
+<section id="o-que-e">
+<h2>O que é o kit</h2>
+<p>O kit é um conjunto de pastas prontas que você copia para a raiz de um repositório. Ele ensina o Copilot a trabalhar do seu jeito: passos pequenos, padrão do projeto, design system do projeto e sem fazer commit por você. Não instala nada: são só arquivos de texto, que o Copilot lê.</p>
+<h3>O que o kit entrega</h3>
+<ul>
+  <li><strong>Regras fixas do projeto</strong> que o Copilot lê em todo chat (stack, comandos, convenções, idioma, responsividade).</li>
+  <li><strong>Comandos <code>/</code></strong> para cada etapa: explicar, especificar, planejar, implementar, revisar, auditar.</li>
+  <li><strong>Agentes</strong> com papéis definidos: implementador, revisor, professor e auditor.</li>
+  <li><strong>Regras por tipo de arquivo</strong>, aplicadas sozinhas em código de front-end e em testes.</li>
+  <li><strong>Um gate</strong> (<code>scripts/gate.sh</code>) que roda lint, typecheck e testes ao fim de cada passo.</li>
+  <li><strong>Um modelo de spec</strong> para transformar o seu briefing em critérios verificáveis.</li>
+</ul>
+<h3>O que o kit não faz</h3>
+<ul>
+  <li>Não lê board nem PBI: você escreve a demanda no prompt.</li>
+  <li>Não faz commit nem push: os commits são seus.</li>
+  <li>Não roda o app nem mede performance sozinho: quem confirma isso é você, no navegador, com a aba Performance e o console.</li>
+</ul>
+<h3>Idioma</h3>
+<p>Os arquivos do kit estão em inglês, porque a IA gera código melhor assim. Cada arquivo tem um comentário em português no topo dizendo o que faz. O Copilot responde em português do Brasil.</p>
+</section>
+
+<section id="instalar">
+<h2>Instalar o kit em um projeto</h2>
+<p>Instalar é só copiar três pastas para a raiz do repo, a pasta onde fica o <code>package.json</code>.</p>
+<ol>
+  <li>Clone este repositório (ou baixe o zip) em uma pasta temporária, fora do projeto.</li>
+  <li>Dentro dele há <code>.github</code>, <code>docs</code> e <code>scripts</code>. A <code>.github</code> é oculta: no Finder, aperte Cmd+Shift+. para ver. No VS Code ela aparece normalmente.</li>
+  <li>Copie as três pastas para a raiz do repo. Se o repo já tem uma <code>.github</code>, junte o conteúdo e não substitua a pasta.</li>
+  <li>Se o repo já tem um <code>.github/copilot-instructions.md</code>, não sobrescreva. Guarde o antigo e copie os trechos úteis para o novo.</li>
+  <li>Abra o repo no VS Code e confirme que o Copilot Chat está ativo. Digite <code>/</code> no chat: os comandos do kit devem aparecer na lista.</li>
+</ol>
+<h3>Teste pessoal, sem afetar o time</h3>
+<p>Crie uma branch sua (<code>git checkout -b teste-kit-ia</code>) e não faça commit das pastas do kit. Se não gostar, apague a branch. Para manter o kit local sem rastrear, adicione <code>.github/prompts</code>, <code>.github/agents</code>, <code>.github/instructions</code>, <code>docs/specs</code> e <code>scripts/gate.sh</code> ao arquivo <code>.git/info/exclude</code> do repo; ele funciona como um <code>.gitignore</code> só seu.</p>
+<div class="note"><p><strong>Se os comandos <code>/</code> não aparecerem:</strong> o formato de prompts e agentes depende da versão do VS Code e do Copilot. Atualize os dois e reinicie o VS Code. Se ainda não aparecer, anote a versão e o que aparece, e ajuste o kit com essa informação.</p></div>
+</section>
+
+<section id="primeiro-uso">
+<h2>Primeiro uso em cada projeto</h2>
+<p>Faça isso uma vez por projeto, em chats novos, nesta ordem.</p>
+<ol>
+  <li><strong><code>/setup-project</code></strong>: preenche o <code>.github/copilot-instructions.md</code>. Ele lê o <code>package.json</code> e o repo, descobre o nome do pacote do design system, os comandos e a stack, pergunta só o que faltar (normalmente se o projeto é ferramenta interna ou produto externo) e edita apenas os campos FILL IN. Confira o que ele preencheu, principalmente o nome do design system e o comando de teste.</li>
+  <li><strong><code>/map-project</code></strong>: lê o repo e descreve os padrões reais (pastas, nomes, forma de chamar API, como os testes são escritos) e lista inconsistências. Cole o que estiver certo na seção Conventions do <code>copilot-instructions.md</code>. Não edita nada.</li>
+  <li><strong><code>/map-design-system</code></strong>: lê o pacote do design system em <code>node_modules</code> e gera <code>docs/design-system.md</code> com os componentes, props e tokens. Confira 2 ou 3 componentes que você conhece. Refaça quando o design system atualizar.</li>
+  <li><strong><code>bash scripts/gate.sh</code></strong> no terminal: confirma que lint, typecheck e testes rodam. Se o script <code>test</code> do projeto for modo watch (<code>--watch</code>, ou <code>vitest</code> sem <code>run</code>), ajuste antes ou o gate trava.</li>
+</ol>
+<h3>Preenchendo o <code>copilot-instructions.md</code> à mão</h3>
+<p>Se preferir não usar o <code>/setup-project</code>, abra o arquivo e troque o que estiver entre <code>&lt;...&gt;</code> ou marcado com FILL IN. O mínimo: nome do pacote do design system (veja <code>dependencies</code> no <code>package.json</code>), comandos de instalar e rodar (<code>npm install</code> e geralmente <code>npm run dev</code> ou <code>npm start</code>), o tipo de produto e uma linha dizendo o que o projeto é. Procure <code>FILL IN</code> com Cmd+F para ver se sobrou algum. Apague as linhas que não souber preencher, para a IA não tratar <code>&lt;...&gt;</code> como instrução.</p>
+</section>
+
+<section id="fluxo">
+<h2>Fluxo de uma tarefa</h2>
+<p>Uma tarefa, um chat. Cada etapa produz algo que você lê e aprova antes de seguir.</p>
+<ol>
+  <li><strong>Briefing.</strong> Escreva a demanda em 3 ou 4 linhas: o que fazer, onde, o que não mexer. Você escreve; a IA não lê board nem PBI.</li>
+  <li><strong><code>/explain</code> (opcional).</strong> Use quando não souber como resolver. Ele explica a área, aponta riscos, propõe 2 ou 3 caminhos e faz 3 perguntas para você conferir se entendeu. Não edita nada.</li>
+  <li><strong><code>/spec</code>.</strong> Transforma o briefing em <code>docs/specs/&lt;nome&gt;.md</code> com objetivo, critérios de aceite, fora de escopo, casos de borda (erro, vazio, carregando, responsivo) e dúvidas em aberto. Leia, corrija e responda as dúvidas antes de seguir.</li>
+  <li><strong><code>/plan</code>.</strong> Preenche o plano da spec em passos pequenos, um passo por commit, dizendo onde cada estado vai morar. Não implementa. Aprove ou peça ajustes.</li>
+  <li><strong><code>/implement-step</code>.</strong> Implementa um passo, roda o gate e para. Veja o diff (<code>git diff</code>), teste no navegador e só então faça o commit, você mesmo. Repita para o próximo passo.</li>
+  <li><strong><code>/review</code> em chat novo.</strong> Escolha o agente <code>reviewer</code>, aponte a spec e deixe ele revisar o diff. Um chat novo evita que a IA defenda o que ela mesma escreveu.</li>
+  <li><strong>Revisão humana.</strong> Você lê o código final. A IA ajuda, mas você responde por ele.</li>
+</ol>
+<h3>Mudar código que já existe</h3>
+<p>No lugar de <code>/implement-step</code> direto, comece com <code>/change-existing-code</code>. Ele mapeia quem usa a área, propõe um teste do comportamento atual quando não há teste e faz o menor diff possível.</p>
+<h3>Tarefa pequena</h3>
+<p>Para ajustes simples (cor, texto, margem) pule spec e plan e vá direto ao <code>/implement-step</code> com a descrição. Use o fluxo completo quando a demanda tiver regra de negócio, vários arquivos ou risco de quebrar algo.</p>
+</section>
+
+<section id="na-pratica">
+<h2>Na prática: do pedido até o commit</h2>
+<p>Exemplo completo com uma demanda inventada: <em>"na tela de ordens, quando a lista vem vazia, mostrar uma mensagem e um botão Atualizar"</em>. Troque pelos nomes do seu projeto. O texto em bloco é o que você digita.</p>
+
+<h3>Passo 1. Entender (só se você não souber por onde começar)</h3>
+<p>Chat novo, agente <code>explainer</code>:</p>
+<div class="code"><button type="button" data-copy>Copiar</button><pre><code>/explain Tela de ordens (src/features/orders). Preciso mostrar um estado vazio quando não há ordens. Como a lista é carregada hoje e onde esse estado entraria?</code></pre></div>
+<p>Leia a resposta e confira se os arquivos citados existem. Responda as 3 perguntas finais para você mesmo; se não souber, peça "explique melhor o ponto X".</p>
+
+<h3>Passo 2. Criar a spec</h3>
+<div class="code"><button type="button" data-copy>Copiar</button><pre><code>/spec Na tela de ordens, quando a lista vem vazia, mostrar uma mensagem "Nenhuma ordem encontrada" e um botão "Atualizar" que recarrega a lista. Usar componentes do design system. Não mexer na tabela, nem nos filtros, nem na chamada de API.</code></pre></div>
+<p>A IA cria <code>docs/specs/orders-empty-state.md</code>. Leia: o objetivo está certo? Os critérios de aceite são verificáveis? "Fora de escopo" tem o que você pediu? Responda as "Dúvidas em aberto", editando o arquivo ou dizendo no chat: <em>"As dúvidas: 1) sim, o botão recarrega; 2) a mensagem é só em português."</em></p>
+
+<h3>Passo 3. Planejar</h3>
+<div class="code"><button type="button" data-copy>Copiar</button><pre><code>/plan docs/specs/orders-empty-state.md</code></pre></div>
+<p>A IA escreve o plano em passos pequenos no fim da spec. Cada passo cabe em um commit? Tem o passo dos testes? Se estiver grande demais, diga <em>"quebre o passo 2 em dois"</em>. Só siga quando concordar.</p>
+
+<h3>Passo 4. Implementar, um passo por vez</h3>
+<p>Troque para o agente <code>implementer</code>:</p>
+<div class="code"><button type="button" data-copy>Copiar</button><pre><code>/implement-step passo 1</code></pre></div>
+<p>A IA edita, roda <code>bash scripts/gate.sh</code> e responde com os arquivos mudados e o resultado. Você faz:</p>
+<ol>
+  <li><code>git diff</code> (ou a aba Source Control do VS Code) e lê o que mudou.</li>
+  <li>Abre a tela no navegador e vê funcionando, em 1280, 1440 e 1920px.</li>
+  <li>Se estiver bom, <strong>você</strong> faz o commit, em português: <code>Adiciona estado vazio na lista de ordens</code>.</li>
+  <li>Se não estiver, diga o que está errado (<em>"o botão ficou fora do padrão do design system, use o componente Button"</em>) e peça para corrigir antes de seguir.</li>
+</ol>
+<p>Depois: <code>/implement-step passo 2</code>, e assim por diante.</p>
+
+<h3>Passo 5. Revisar em chat novo</h3>
+<p>Abra um chat novo e escolha o agente <code>reviewer</code>:</p>
+<div class="code"><button type="button" data-copy>Copiar</button><pre><code>/review docs/specs/orders-empty-state.md</code></pre></div>
+<p>Ele lê o diff e lista problemas por gravidade (bloqueia, deveria corrigir, sugestão). Para cada "bloqueia", volte ao agente <code>implementer</code> em outro chat e peça a correção, citando o problema. Rode o <code>/review</code> de novo até não sobrar bloqueio.</p>
+
+<h3>Passo 6. Fechar</h3>
+<p>Leia o código final, rode o gate e o app uma última vez, e abra o PR do jeito que o seu time já faz. Se a tarefa ficou longa e você precisa trocar de chat no meio, rode <code>/context-summary</code> e cole o resumo no chat novo.</p>
+
+<div class="note"><p><strong>Quanto cada passo gasta.</strong> O fluxo completo usa várias mensagens e gasta mais do seu limite. Se a demanda for pequena (trocar uma cor, um texto), pule os passos 1 a 3 e use só <code>/implement-step Trocar o texto do botão X para Y em src/...</code>.</p></div>
+</section>
+
+<section id="receitas">
+<h2>Receitas: "preciso fazer X, como proceder"</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Situação</th><th>Como proceder</th></tr></thead>
+<tbody>
+<tr><td>Feature nova com regra de negócio</td><td>O fluxo completo: <code>/explain</code> se necessário, <code>/spec</code>, <code>/plan</code>, <code>/implement-step</code> por passo, <code>/review</code> em chat novo</td></tr>
+<tr><td>Não sei como resolver</td><td>Agente <code>explainer</code>, <code>/explain &lt;demanda&gt;</code>. Depois responda as 3 perguntas e peça explicação do que não entendeu</td></tr>
+<tr><td>Mudar código que já existe</td><td><code>/change-existing-code &lt;o que mudar&gt;</code>. Ele mapeia quem usa a área, propõe teste do comportamento atual e faz o menor diff</td></tr>
+<tr><td>Componente novo</td><td><code>/new-component &lt;descrição&gt;</code>. Ele procura antes no design system e no repo se já existe algo parecido</td></tr>
+<tr><td>Bug</td><td>Agente <code>explainer</code>: <code>/explain &lt;sintoma, onde acontece, como reproduzir&gt;</code>. Quando achar a causa, <code>/change-existing-code corrigir &lt;causa&gt;</code>. Peça um teste que reproduza o bug antes da correção</td></tr>
+<tr><td>Só faltam testes</td><td><code>/write-test src/caminho/Arquivo.tsx</code>. Ele não muda o código de produção: se achar um bug, descreve</td></tr>
+<tr><td>Tela lenta</td><td><code>/perf-review &lt;tela e o que está lento&gt;</code>. Traga os números da medição. Só depois aprove a correção</td></tr>
+<tr><td>Quero saber como está um projeto ou módulo</td><td>Agente <code>auditor</code>, <code>/audit-project &lt;pasta&gt;</code></td></tr>
+<tr><td>Revisar meu próprio código antes do PR</td><td>Chat novo, agente <code>reviewer</code>, <code>/review &lt;spec ou descrição do que você fez&gt;</code></td></tr>
+<tr><td>O chat ficou longo e confuso</td><td><code>/context-summary</code>, copie o resumo, abra chat novo e cole</td></tr>
+<tr><td>A IA fez algo fora do escopo</td><td>Diga <em>"desfaça o que está fora da spec"</em> e reforce o "Fora de escopo". Se já está no disco, use <code>git restore &lt;arquivo&gt;</code> ou descarte pelo Source Control</td></tr>
+<tr><td>A IA errou o design system</td><td>Rode <code>/map-design-system</code> de novo e aponte o componente certo: <em>"use o Button do design system, veja docs/design-system.md"</em></td></tr>
+</tbody></table></div>
+<h3>Como escrever bons pedidos</h3>
+<ul>
+  <li>Diga <strong>onde</strong>: pasta ou arquivo. Sem isso a IA procura em tudo e erra mais.</li>
+  <li>Diga o que <strong>não</strong> mexer.</li>
+  <li>Diga o resultado esperado em 1 ou 2 frases verificáveis ("aparece a mensagem X quando a lista tem 0 itens").</li>
+  <li>Um pedido, uma mudança. Se tiver duas, faça duas tarefas.</li>
+  <li>Se a resposta vier errada, corrija com precisão ("o arquivo certo é X, não Y") em vez de repetir o pedido.</li>
+</ul>
+</section>
+
+<section id="comandos">
+<h2>Referência dos comandos</h2>
+<p>Digite <code>/</code> no chat do Copilot e o nome. Tudo o que você escrever depois do comando vira a entrada dele (briefing, pasta, demanda).</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Comando</th><th>Para que serve</th><th>Edita arquivos?</th></tr></thead>
+<tbody>
+<tr><td><code>/setup-project</code></td><td>Preenche os campos FILL IN do <code>copilot-instructions.md</code></td><td>Só esse arquivo</td></tr>
+<tr><td><code>/map-project</code></td><td>Descreve padrões reais do repo e inconsistências</td><td>Não</td></tr>
+<tr><td><code>/map-design-system</code></td><td>Gera <code>docs/design-system.md</code> a partir do design system</td><td>Só esse arquivo</td></tr>
+<tr><td><code>/explain</code></td><td>Explica uma área e propõe 2 ou 3 caminhos</td><td>Não</td></tr>
+<tr><td><code>/spec</code></td><td>Cria a spec em <code>docs/specs</code> a partir do briefing</td><td>Só a spec</td></tr>
+<tr><td><code>/plan</code></td><td>Quebra a spec em passos pequenos</td><td>Só a spec</td></tr>
+<tr><td><code>/implement-step</code></td><td>Implementa um passo e roda o gate</td><td>Sim, código</td></tr>
+<tr><td><code>/new-component</code></td><td>Cria um componente com o design system, teste e responsividade</td><td>Sim, código</td></tr>
+<tr><td><code>/write-test</code></td><td>Escreve testes para um arquivo ou fluxo</td><td>Só testes</td></tr>
+<tr><td><code>/change-existing-code</code></td><td>Roteiro seguro para mexer em código antigo</td><td>Sim, código</td></tr>
+<tr><td><code>/review</code></td><td>Revisa o diff contra a spec (chat novo)</td><td>Não</td></tr>
+<tr><td><code>/audit-project</code></td><td>Audita o projeto: bom, ruim, erros possíveis, responsividade</td><td>Não</td></tr>
+<tr><td><code>/perf-review</code></td><td>Investiga lentidão: medir, mover estado, só então memoizar</td><td>Não, até você aprovar</td></tr>
+<tr><td><code>/context-summary</code></td><td>Resume o estado para continuar em outro chat</td><td>Não</td></tr>
+</tbody></table></div>
+<h3>Exemplos de uso</h3>
+<div class="code"><button type="button" data-copy>Copiar</button><pre><code>/spec Adicionar estado vazio na lista de ordens. Mostrar mensagem e botão Atualizar. Não mexer na tabela.
+/explain Como funciona o filtro da tela de carteira?
+/audit-project src/features/orders
+/write-test src/features/orders/OrderList.tsx</code></pre></div>
+</section>
+
+<section id="agentes">
+<h2>Agentes</h2>
+<p>Os agentes aparecem no seletor do chat do Copilot. Um agente muda o papel da IA durante toda a conversa.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Agente</th><th>Papel</th><th>Edita?</th><th>Quando usar</th></tr></thead>
+<tbody>
+<tr><td><code>implementer</code></td><td>Implementa um passo por vez seguindo a spec e o plano, roda o gate</td><td>Sim</td><td>Durante o <code>/implement-step</code></td></tr>
+<tr><td><code>reviewer</code></td><td>Revisor crítico com checklist de React, testes e responsividade</td><td>Não</td><td>Em chat novo, depois de implementar</td></tr>
+<tr><td><code>explainer</code></td><td>Professor: explica em português simples, mostra opções com prós e contras</td><td>Não</td><td>Quando você quer entender o porquê</td></tr>
+<tr><td><code>auditor</code></td><td>Auditor sênior: diz o que está bom, ruim, que erro pode acontecer</td><td>Não</td><td>Com o <code>/audit-project</code></td></tr>
+</tbody></table></div>
+<h3>Dica de segurança</h3>
+<p>Os agentes <code>reviewer</code>, <code>explainer</code> e <code>auditor</code> não devem editar nada. Se o seletor de ferramentas do VS Code permitir, restrinja as ferramentas deles a leitura e busca. Assim a regra não depende só da instrução em texto.</p>
+<h3>Prompt ou agente?</h3>
+<p>O prompt (<code>/comando</code>) é uma receita para uma tarefa. O agente é um papel que dura a conversa toda. Eles se combinam: escolha o agente <code>auditor</code> e rode <code>/audit-project</code>.</p>
+</section>
+
+<section id="regras">
+<h2>Regras automáticas</h2>
+<p>Três arquivos são lidos sem você pedir. Eles guiam tudo o que a IA escreve.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Arquivo</th><th>Quando vale</th><th>O que contém</th></tr></thead>
+<tbody>
+<tr><td><code>.github/copilot-instructions.md</code></td><td>Em todo chat</td><td>Projeto, comandos, convenções, idioma, jeito de trabalhar, padrões e precedência, responsividade, o que nunca fazer</td></tr>
+<tr><td><code>.github/instructions/frontend.instructions.md</code></td><td>Em arquivos <code>.ts</code>, <code>.tsx</code> e <code>.css</code></td><td>Design system, estado, listas, effects, segurança do DOM, Context, performance, acessibilidade, responsividade</td></tr>
+<tr><td><code>.github/instructions/testing.instructions.md</code></td><td>Em arquivos de teste</td><td>Testar comportamento, RTL, mocks do Jest, Playwright</td></tr>
+</tbody></table></div>
+<h3>O que as regras de front-end forçam</h3>
+<ul>
+  <li>Estado fica perto de quem usa e nunca é mutado. Não inicializar <code>useState</code> a partir de props.</li>
+  <li><code>key</code> estável e única, nunca o índice em lista dinâmica.</li>
+  <li><code>useEffect</code> só para efeito real, com cleanup e <code>AbortController</code>. Nada de estado derivado em effect.</li>
+  <li>Sem <code>{...props}</code> solto em elemento DOM e sem HTML não sanitizado.</li>
+  <li>Performance: medir primeiro; mover o estado para baixo antes de memoizar; checar se o projeto usa React Compiler antes de colocar <code>memo</code> manual.</li>
+</ul>
+<h3>O que as regras de teste forçam</h3>
+<ul>
+  <li>Testar o que o usuário vê, com <code>getByRole</code>. Cobrir fluxo principal, erro, vazio e carregando.</li>
+  <li>Mockar só a borda (API, rede, timers). Preferir implementação real.</li>
+  <li>Sem <code>.only</code> e sem <code>.skip</code> sem motivo. Cobertura é guia, não meta de 100%.</li>
+</ul>
+<h3>Quando o padrão do repo diverge das regras</h3>
+<p>Vale a seção "Standards and precedence" do <code>copilot-instructions.md</code>, nesta ordem: a spec, o padrão alvo que você definiu para código novo, o padrão local do código ao redor e, por fim, as regras gerais. Código novo segue o padrão alvo; código antigo mantém o padrão local até uma spec pedir refatoração. Nunca misture dois padrões no mesmo arquivo. Para adotar um padrão novo de propósito (biblioteca, estrutura, convenção), diga isso no prompt: a IA lista os arquivos afetados e migra uma área por vez, com os testes verdes a cada passo.</p>
+<h3>Se a IA estiver ignorando regras</h3>
+<p>Regras demais competem por atenção. Corte as seções menos úteis do <code>frontend.instructions.md</code> (por exemplo Context e Performance) e veja se melhora.</p>
+</section>
+
+<section id="auditoria">
+<h2>Auditoria e performance</h2>
+<h3><code>/audit-project</code></h3>
+<p>Use o agente <code>auditor</code> em chat novo e escreva depois do comando a pasta que quer auditar (por exemplo <code>src/features/orders</code>). Sem pasta, ele tenta o projeto inteiro, mas num repo grande o relatório fica raso. Comece por uma feature que você conhece bem, assim você consegue dizer se ele acertou.</p>
+<p>Ele olha, nesta ordem: estrutura, estado e dados, renderização e performance, uso do design system, TypeScript, testes, acessibilidade, responsividade e segurança. A resposta vem em português com:</p>
+<ul>
+  <li><strong>Resumo:</strong> saúde geral (boa, ok ou arriscada) e o motivo principal.</li>
+  <li><strong>O que está bom:</strong> só pontos fortes reais, com evidência.</li>
+  <li><strong>O que está ruim:</strong> tabela com problema, arquivo e linha, e gravidade.</li>
+  <li><strong>Erros que podem acontecer:</strong> o sintoma concreto de cada problema, por exemplo "a lista perde o foco do input ao ordenar por causa de key com índice".</li>
+  <li><strong>Responsividade:</strong> como está contra o alvo do produto, com as correções mais baratas primeiro.</li>
+  <li><strong>O que melhorar:</strong> ganhos rápidos primeiro, refatorações maiores depois.</li>
+  <li><strong>Não confirmado:</strong> o que ele não conseguiu verificar e a quem perguntar.</li>
+</ul>
+<h3>Como julgar o relatório</h3>
+<ul>
+  <li>Desconfie de qualquer afirmação sem arquivo e linha.</li>
+  <li>A auditoria só lê código. Responsividade e performance precisam ser confirmadas por você: abra a tela em 1280, 1440 e 1920px e meça com a aba Performance do navegador ou com o componente Profiler do React.</li>
+  <li>Se algo parecer exagerado, pergunte ao auditor a evidência.</li>
+</ul>
+<h3>Começando pela auditoria</h3>
+<ol>
+  <li>Copie o kit numa branch sua e rode <code>/setup-project</code> (e <code>/map-design-system</code>, se puder).</li>
+  <li>Audite uma pasta que você conhece.</li>
+  <li>Escolha 2 ou 3 achados úteis e baratos de corrigir. Cada achado vira uma tarefa pequena: <code>/spec Corrigir o problema 2 da auditoria: &lt;cole o achado com arquivo e linha&gt;. Não mexer em &lt;o que fica de fora&gt;.</code></li>
+  <li>Siga o fluxo normal e faça um achado por vez, com um commit seu em cada passo.</li>
+</ol>
+<h3><code>/perf-review</code></h3>
+<p>Para lentidão ou re-renders demais. Ele não sai mudando código: diz como medir antes e depois, acha onde o estado vive, ordena as causas prováveis e propõe as correções na ordem certa. Mover o estado para baixo ou isolá-lo em um componente pequeno vem antes de <code>memo</code>, <code>useMemo</code> e <code>useCallback</code>.</p>
+<p><strong>Como medir sem instalar nada:</strong> a aba Performance do Chrome (tarefas longas aparecem em vermelho), o componente <code>&lt;Profiler&gt;</code> nativo do React com um console.log temporário no onRender, ou contagem de renders com console.log (o Strict Mode dobra a contagem em dev). Remova o código de medição antes de finalizar e não faça commit dele. Traga os números para ele trabalhar com dados reais.</p>
+</section>
+
+<section id="contexto">
+<h2>Contexto, limite de uso e boas práticas</h2>
+<h3>Um chat por tarefa</h3>
+<p>Chats longos acumulam contexto, ficam lentos e confusos. Abra um chat novo a cada tarefa e, principalmente, para o <code>/review</code>. Se precisar continuar uma tarefa em outro chat, rode <code>/context-summary</code> e cole o resumo no chat novo.</p>
+<h3>Limite de uso</h3>
+<p>O Copilot pode contar por requisição ou por crédito, dependendo do plano da sua empresa. Confira no seu plano e no painel de uso, e meça o gasto de cada comando no primeiro teste. O fluxo completo gasta mais que um prompt solto. Para economizar:</p>
+<ul>
+  <li>Use o fluxo completo só em demandas com regra de negócio, vários arquivos ou risco.</li>
+  <li>Em ajustes pequenos vá direto ao <code>/implement-step</code>.</li>
+  <li>Aponte pastas e arquivos em vez de pedir "o projeto inteiro".</li>
+  <li>Rode <code>/setup-project</code>, <code>/map-project</code> e <code>/map-design-system</code> uma vez por projeto, não a cada tarefa.</li>
+  <li>Uma tarefa por chat. Chats longos carregam o histórico todo a cada mensagem.</li>
+</ul>
+<h3>Gate (o "hook")</h3>
+<p>O <code>scripts/gate.sh</code> faz o papel dos hooks: roda lint, typecheck e testes, pulando o que o projeto não tem, e para no primeiro erro. A IA é instruída a rodá-lo ao fim de cada passo e só dizer "terminei" se passar. Você também pode rodá-lo no terminal: <code>bash scripts/gate.sh</code>. Funciona no zsh do Mac, porque o comando chama o bash explicitamente.</p>
+<h3>Testes</h3>
+<p>O comando de teste é <code>npm run test</code>, que roda uma vez. A IA nunca deve rodar o modo watch, porque ele não termina e trava o agente. Confira no <code>package.json</code> que o script <code>test</code> não é watch.</p>
+<h3>Commits</h3>
+<p>Você faz todos os commits, em português, curtos e no imperativo. Se quiser uma sugestão, peça: "sugira uma mensagem de commit".</p>
+<h3>Loops de revisão</h3>
+<p>O ciclo é implementar, gate, revisar em chat novo, corrigir. Quando o <code>reviewer</code> apontar algo em "bloqueia", corrija e rode o <code>/review</code> de novo em outro chat.</p>
+</section>
+
+<section id="responsividade">
+<h2>Responsividade por tipo de produto</h2>
+<p>O alvo depende do produto. Defina isso no <code>copilot-instructions.md</code> (o <code>/setup-project</code> pergunta).</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Tipo</th><th>Alvo</th><th>O que a IA deve garantir</th></tr></thead>
+<tbody>
+<tr><td>Ferramenta interna</td><td>Desktop, de 1280px a 1920px ou mais, zoom até 150% e janela redimensionada</td><td>Sem sobreposição, texto cortado ou scroll horizontal acidental; tabelas, painéis e barras que se adaptam quando a largura diminui</td></tr>
+<tr><td>Produto externo</td><td>Mobile-first e também desktop</td><td>Tudo acima, mais ajuste em 360px e alvos de toque de pelo menos 44px</td></tr>
+</tbody></table></div>
+<h3>Regras de código</h3>
+<ul>
+  <li>Flex e grid, unidades relativas (<code>rem</code>, <code>%</code>, <code>fr</code>, <code>clamp</code>) e <code>min-width</code> ou <code>max-width</code>, em vez de larguras fixas em <code>px</code>.</li>
+  <li>Breakpoints vêm dos tokens do design system, se existirem. Não inventar novos.</li>
+  <li>Sem <code>height: 100vh</code> com overflow escondido; use <code>min-height</code> e regiões com scroll.</li>
+</ul>
+<h3>Em código antigo</h3>
+<p>A IA não reescreve o layout de uma tela mal resolvida a menos que a spec peça. Ela apenas aponta a lacuna no relatório, para uma demanda pequena não virar uma refatoração grande.</p>
+<h3>Antes de dizer que terminou</h3>
+<p>Abra a tela em 1280, 1440 e 1920px (e 360 e 768px no produto externo). A IA não enxerga o resultado, então essa checagem é sua.</p>
+</section>
+
+<section id="roteiro">
+<h2>Roteiro de teste, do zero até a auditoria</h2>
+<p>Use uma branch descartável e uma tarefa de mentira. Nada disso vai para o time.</p>
+<h3>Preparação (10 min)</h3>
+<ol>
+  <li><code>git checkout -b teste-kit-ia</code> na raiz do repo.</li>
+  <li>Copie <code>.github</code>, <code>docs</code> e <code>scripts</code> do kit para a raiz.</li>
+  <li>Rode <code>/setup-project</code> no chat do Copilot e confira o que ele preencheu.</li>
+  <li>Rode <code>bash scripts/gate.sh</code> no terminal. Se der erro, guarde a saída.</li>
+</ol>
+<h3>Mapear o projeto (15 min)</h3>
+<ol start="5">
+  <li>Em chat novo, <code>/map-project</code>. Compare com o que você sabe do repo.</li>
+  <li>Em outro chat novo, <code>/map-design-system</code>. Confira o <code>docs/design-system.md</code> com 2 ou 3 componentes que você conhece.</li>
+</ol>
+<h3>Tarefa de mentira (30 a 40 min)</h3>
+<ol start="7">
+  <li>Escolha algo pequeno e seguro: escrever testes de um componente sem teste é o que menos arrisca. Outras opções: estado vazio numa lista ou melhorar um loading.</li>
+  <li><code>/explain</code> com a demanda. Veja se os arquivos citados existem.</li>
+  <li>Briefing de 3 ou 4 linhas e <code>/spec</code>. Leia a spec.</li>
+  <li><code>/plan</code>, e se ficar bom, <code>/implement-step</code> no primeiro passo.</li>
+  <li>Veja o diff, rode o gate, e faça o commit ou descarte.</li>
+  <li>Chat novo, agente <code>reviewer</code>, <code>/review</code> apontando a spec.</li>
+</ol>
+<h3>Auditoria (10 min)</h3>
+<ol start="13">
+  <li>Chat novo, agente <code>auditor</code>, <code>/audit-project</code> com uma pasta que você conhece.</li>
+  <li>Confira o relatório: tem arquivo e linha? Tem "Não confirmado"? Os pontos de responsividade fazem sentido no navegador?</li>
+</ol>
+<h3>No final</h3>
+<ol start="15">
+  <li>Anote o que funcionou, o que o Copilot errou ou ignorou e se algum comando não apareceu.</li>
+  <li>Para limpar: <code>git checkout -</code> e <code>git branch -D teste-kit-ia</code>.</li>
+</ol>
+<div class="note"><p><strong>Versão mínima.</strong> Se faltar tempo: passos 1 a 6, depois 13 e 14.</p></div>
+</section>
+
+<section id="problemas">
+<h2>Problemas comuns e limites honestos</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr></thead>
+<tbody>
+<tr><td>Os comandos <code>/</code> não aparecem</td><td>Versão do VS Code ou do Copilot antiga, ou pasta <code>.github</code> no lugar errado</td><td>Atualize, reinicie o VS Code e confirme que <code>.github/prompts</code> está na raiz do repo</td></tr>
+<tr><td>O agente não aparece no seletor</td><td>Mesmo motivo, ou formato <code>.agent.md</code> não suportado na sua versão</td><td>Anote a versão e ajuste o kit</td></tr>
+<tr><td>O gate trava</td><td>Script <code>test</code> em modo watch</td><td>Use um script de teste que rode uma vez; confira no <code>package.json</code></td></tr>
+<tr><td>"No such file" ao rodar o gate</td><td>Terminal fora da raiz do repo</td><td><code>cd</code> até a pasta do <code>package.json</code></td></tr>
+<tr><td>A IA ignora regras</td><td>Muitas regras competindo</td><td>Corte seções do <code>frontend.instructions.md</code></td></tr>
+<tr><td>A IA inventa componente do design system</td><td>O catálogo não existe ou está desatualizado</td><td>Rode <code>/map-design-system</code> de novo</td></tr>
+<tr><td>A IA mexe fora do escopo</td><td>Spec sem "Fora de escopo"</td><td>Preencha a seção e reaplique</td></tr>
+</tbody></table></div>
+<h3>Limites honestos</h3>
+<ul>
+  <li>O kit é uma primeira versão e não foi validado em muitos projetos reais. Ajuste com o que você observar.</li>
+  <li>A IA não roda o app, então não vê tela, não mede performance e não confirma responsividade. Isso é com você.</li>
+  <li>As regras do kit são boas práticas gerais, não verdades absolutas. Quando divergem do repo, vale a ordem de precedência do <code>copilot-instructions.md</code>.</li>
+  <li>Relatórios de auditoria são hipóteses bem fundamentadas, não veredito. Confirme os pontos importantes.</li>
+  <li>O limite de uso do Copilot pode contar de forma diferente do que o guia supõe. Confira no seu plano.</li>
+</ul>
+<h3>Próximo passo</h3>
+<p>Rode o roteiro de teste, anote o que errou e traga de volta. O kit melhora com o uso real.</p>
+</section>
+</main>
+</div>
+<script>
+document.querySelectorAll('[data-copy]').forEach(function(b){
+  b.addEventListener('click',function(){
+    var code=b.parentElement.querySelector('pre code');
+    var t=code.textContent;
+    var done=function(){b.textContent='Copiado';setTimeout(function(){b.textContent='Copiar'},1500)};
+    var fallback=function(){
+      var r=document.createRange();r.selectNodeContents(code);
+      var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+      try{document.execCommand('copy')?done():(b.textContent='Selecionado')}catch(e){b.textContent='Selecionado'}
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,fallback)}else{fallback()}
+  });
+});
+</script>
+</body>
+</html>
