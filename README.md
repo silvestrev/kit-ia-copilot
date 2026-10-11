@@ -28,6 +28,7 @@ Atenção: `.github` é pasta oculta. No Mac use Cmd+Shift+. no Finder; no VS Co
 - `/context-summary`: resume o estado para continuar em outro chat
 - `/map-design-system`: lê o pacote do design system em node_modules e gera `docs/design-system.md` (faça uma vez e refaça quando o design system atualizar)
 - `/audit-project`: audita o projeto: o que está bom, o que está ruim, que erros podem acontecer, responsividade e o que melhorar (não edita nada; use o agente `auditor`)
+- `/explain-finding`: aprofunda UM problema da auditoria (ex.: `/explain-finding P3`): o que é, por que importa, quando ignorar, como corrigir e qual comando rodar depois (não edita nada)
 - `/perf-review`: investiga lentidão ou re-renders: medir, mover estado para baixo e só então memoizar
 - `/setup-project`: preenche os campos FILL IN do `copilot-instructions.md` lendo o repo e perguntando só o que faltar (rode uma vez por projeto)
 - `/map-project`: explora um projeto existente e propõe o preenchimento das instruções

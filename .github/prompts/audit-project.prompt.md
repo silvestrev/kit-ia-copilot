@@ -18,10 +18,18 @@ Look at, in this order:
 Output format (Brazilian Portuguese):
 - **Resumo**: 3 lines, overall health (good / ok / risky) with the main reason.
 - **O que está bom**: only real strengths, with evidence.
-- **O que está ruim**: table with problem, where (file:line), severity (high/medium/low).
-- **Erros que podem acontecer**: for each relevant problem, the concrete symptom (e.g. "list flickers and loses input focus when sorted because of index keys") and how likely it is.
+- **Quadro de problemas**: table with ID (P1, P2...), problem, where (file:line), severity (high/medium/low), effort (small/medium/large).
+- **Detalhe de cada problema**: for EVERY medium or high item (and low ones only if cheap), give this card. Never just list it in one line:
+  - **O que é**: plain explanation, no jargon, with the exact code snippet (max 10 lines).
+  - **Por que importa**: the concrete symptom for the user or the team (e.g. "list loses input focus when sorted"), and how likely it is.
+  - **Quando ignorar**: the situation where this is fine and not worth touching (be honest; "medium" often means "ok for now").
+  - **Como corrigir**: the smallest fix, as steps, with a before/after snippet.
+  - **Como verificar**: how to confirm it is fixed (test, command, or what to look at in the browser).
+  - **Risco de mexer**: what could break, and which tests protect it.
+  - **Próximo passo**: the exact command to run next, e.g. `/spec fix P3 ...` for anything beyond a one-file change, or `/change-existing-code` for a small one.
+- **Erros que podem acontecer**: only the ones not already covered above.
 - **Responsividade**: current state for the product's target (desktop or mobile) and the cheapest fixes first.
-- **O que melhorar**: quick wins first, then larger refactors, in suggested order. Say which ones are worth doing now and which can wait.
+- **Ordem sugerida**: quick wins first, then larger refactors. Mark each as "fazer agora", "fazer junto com outra tarefa" or "pode esperar".
 - **Não confirmado**: what you could not verify and who to ask.
 
 Scope (empty = whole project):
