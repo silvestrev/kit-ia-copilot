@@ -8,7 +8,7 @@ Look at, in this order:
 1. Structure: folders, naming, separation of features/components/hooks/services, duplicated code.
 2. State and data: where state lives, state lifted too high, state initialized from props, mutation, derived state in effects, fetching in effects without cleanup, caching.
 3. Rendering and performance: large lists, index as key, inline handlers on memoized children, fat Contexts, expensive work in render, heavy bundles, lack of lazy loading. Check whether React Compiler is used.
-4. Design system: duplicated components, hardcoded colors/spacing instead of tokens.
+4. Design system: duplicated components, hardcoded colors/spacing instead of tokens. For a deep design system audit, tell me to run `/check-design-system projeto inteiro` after this one.
 5. TypeScript: `any`, loose types, unchecked API responses.
 6. Tests: what is covered, what critical flow has no test, weak or skipped tests, over-mocking, flakiness risks.
 7. Accessibility: semantics, labels, focus, keyboard.
